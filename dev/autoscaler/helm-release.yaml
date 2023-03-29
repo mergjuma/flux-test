@@ -1,0 +1,50 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: cluster-autoscaler
+  namespace: ops
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/chart-image: glob:v1.24.*
+spec:
+  chart:
+    repository: https://kubernetes.github.io/autoscaler
+    name: cluster-autoscaler
+    version: 9.27.0
+  helmVersion: v3
+  values:
+    image:
+      repository: registry.k8s.io/autoscaling/cluster-autoscaler
+      tag: v1.24.0
+    podLabels:
+      app.hobsons.io/env-name: "dev"
+      app.hobsons.io/env-type: "dev"
+      app.hobsons.io/maintenance-contact: "dl-cloudoperations"
+      app.hobsons.io/owner-contact: "dl-cloudoperations"
+      app.hobsons.io/product-component: "k8s"
+      app.hobsons.io/product-line: "platform"
+      app.hobsons.io/provisioner: "fluxcd"
+      app.kubernetes.io/component: "k8s"
+      app.kubernetes.io/instance: "cluster-autoscaler"
+      app.kubernetes.io/managed-by: "fluxcd"
+      app.kubernetes.io/name: "cluster-autoscaler"
+      app.kubernetes.io/part-of: "platform"
+    autoDiscovery:
+      clusterName: tf-platform-k8s-dev
+      enabled: true
+    sslCertPath: /etc/kubernetes/pki/ca.crt
+    extraArgs:
+      skip-nodes-with-system-pods: false
+    rbac:
+      create: true
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::452534275406:role/tf-platform-k8s-dev-ops-autoscaler"
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 150m
+        memory: 256Mi

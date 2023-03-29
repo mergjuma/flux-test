@@ -1,0 +1,31 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: metrics-server
+  namespace: ops
+  annotations:
+    fluxcd.io/automated: "true"
+    #fluxcd.io/tag.chart-image: glob:v0.5.*
+spec:
+  chart:
+    repository: https://kubernetes-sigs.github.io/metrics-server/
+    name: metrics-server
+    #version: 3.5.0
+    version: 3.9.0
+  helmVersion: v3
+  values:
+    rbac:
+      create: true
+    image:
+      #repository: k8s.gcr.io/metrics-server/metrics-server
+      repository: registry.k8s.io/metrics-server/metrics-server
+      #tag: v0.5.0
+      tag: ""
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi

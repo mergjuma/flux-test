@@ -1,0 +1,24 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: ns-scoped-resources-must-have-base-labels
+spec:
+  enforcementAction: dryrun
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    labels:
+    - app.hobsons.io/owner-contact
+    - app.hobsons.io/maintenance-contact
+    - app.hobsons.io/env-name
+    - app.hobsons.io/env-type
+    - app.hobsons.io/product-component
+    - app.hobsons.io/product-line
+    - app.hobsons.io/provisioner
+    - app.kubernetes.io/component
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/managed-by
+    - app.kubernetes.io/name
+    - app.kubernetes.io/part-of

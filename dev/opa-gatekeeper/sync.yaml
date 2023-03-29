@@ -1,0 +1,20 @@
+apiVersion: config.gatekeeper.sh/v1alpha1
+kind: Config
+metadata:
+  name: config
+  namespace: ops
+spec:
+  match:
+    - excludedNamespaces: ["kube-system", "kube-node-lease"]
+      processes: ["*"]
+  sync:
+    syncOnly:
+      - group: ""
+        version: "v1"
+        kind: "Namespace"
+      - group: ""
+        version: "v1"
+        kind: "Pod"
+      - group: "networking.k8s.io"
+        version: "v1beta1"
+        kind: "Ingress"

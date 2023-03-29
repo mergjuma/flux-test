@@ -1,0 +1,50 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: ops
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/chart-image: semver:~0.13
+spec:
+  chart:
+    repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami/
+    name: external-dns
+    version: 6.15.0
+  helmVersion: v3
+  values:
+    image:
+      registry: docker.io
+      repository: bitnami/external-dns
+      tag: 0.13.4-debian-11-r1
+    resources:
+      limits:
+        cpu: 50m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+    aws:
+      zoneType: "public"
+    domainFilters: ["dev-k8s.hobsonsdev.net"]
+    txtOwnerId: "tf-platform-k8s-dev-ops-external-dns"
+    policy: sync
+    podLabels:
+      #Chart already supplies app.kubernetes.io/name, app.kubernetes.io/managed-by and app.kubernetes.io/instance
+      app.hobsons.io/env-name: "dev"
+      app.hobsons.io/env-type: "dev"
+      app.hobsons.io/maintenance-contact: "dl-cloudoperations"
+      app.hobsons.io/owner-contact: "dl-cloudoperations"
+      app.hobsons.io/product-component: "k8s"
+      app.hobsons.io/product-line: "platform"
+      app.hobsons.io/provisioner: "fluxcd"
+      app.kubernetes.io/component: "k8s"
+      app.kubernetes.io/part-of: "platform"
+      app.kubernetes.io/version: "0.13.0"
+    rbac:
+      create: true
+      apiVersion: v1
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::452534275406:role/tf-platform-k8s-dev-ops-external-dns

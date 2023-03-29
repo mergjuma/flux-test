@@ -1,0 +1,59 @@
+# borrowed from https://cloud.weave.works/k8s/scope.yaml?k8s-version=1.9.3
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weave-scope-cluster-agent
+  labels:
+    name: weave-scope-cluster-agent
+    app: weave-scope
+    weave-cloud-component: scope
+    weave-scope-component: cluster-agent
+  namespace: weave
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: weave-scope-cluster-agent
+      app: weave-scope
+      weave-cloud-component: scope
+      weave-scope-component: cluster-agent
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        name: weave-scope-cluster-agent
+        app: weave-scope
+        weave-cloud-component: scope
+        weave-scope-component: cluster-agent
+    spec:
+      containers:
+        - name: scope-cluster-agent
+          args:
+            - '--mode=probe'
+            - '--probe-only'
+            - '--probe.kubernetes.role=cluster'
+            - '--weave=false'
+            - 'weave-scope-app.ops.svc.cluster.local.:80'
+          env:
+          - name: CHECKPOINT_DISABLE
+            value: "true"
+          command:
+            - /home/weave/scope
+          image: 'docker.io/weaveworks/scope:1.12.0'
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 150Mi
+          volumeMounts:
+            - name: scope-plugins
+              mountPath: /var/run/scope/plugins
+              readOnly: true
+      serviceAccountName: weave-scope
+      volumes:
+        - name: scope-plugins
+          hostPath:
+            path: /var/run/scope/plugins

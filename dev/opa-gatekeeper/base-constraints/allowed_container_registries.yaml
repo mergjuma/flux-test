@@ -1,0 +1,19 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sAllowedRepos
+metadata:
+  name: allowed-container-registries
+spec:
+  enforcementAction: dryrun
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    repos:
+      - "hobsons-platform-docker.jfrog.io/platform/"
+    excludeNamespace:
+      - kube-system
+      - kube-public
+      - kube-node-lease
+      - default
+      - ops

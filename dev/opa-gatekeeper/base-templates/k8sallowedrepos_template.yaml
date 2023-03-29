@@ -1,0 +1,47 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sallowedrepos
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAllowedRepos
+        listKind: K8sAllowedReposList
+        plural: k8sallowedrepos
+        singular: k8sallowedrepos
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            repos:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sallowedrepos
+        default is_not_excluded_namespace = false
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          satisfied := [good | repo = input.parameters.repos[_] ; good = startswith(container.image, repo)]
+          not any(satisfied)
+          is_not_excluded_namespace
+          msg := sprintf("REGISTRY NOT ALLOWED: container <%v> has an invalid image repo <%v>, allowed repos are %v", [container.name, container.image, input.parameters.repos])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          satisfied := [good | repo = input.parameters.repos[_] ; good = startswith(container.image, repo)]
+          not any(satisfied)
+          is_not_excluded_namespace
+          msg := sprintf("REGISTRY NOT ALLOWED: container <%v> has an invalid image repo <%v>, allowed repos are %v", [container.name, container.image, input.parameters.repos])
+        }
+
+        is_not_excluded_namespace {
+          provided_namespace := {input.review.object.metadata.namespace}
+          ignored_namespaces := {excludeNamespace | excludeNamespace := input.parameters.excludeNamespace[_]}
+          excluded := provided_namespace & ignored_namespaces
+          count(excluded) < 1
+        }

@@ -1,0 +1,53 @@
+resources:
+  - github.com/weaveworks/flagger/kustomize/base/flagger?ref=v1.0.0-rc.4
+  - github.com/weaveworks/flagger/kustomize/base/prometheus?ref=v1.0.0-rc.4
+  - github.com/weaveworks/flagger/kustomize/tester/?ref=v1.0.0-rc.4
+  - alertprovider.yaml
+patches:
+- target:
+    kind: Deployment
+    name: flagger
+  patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: flagger
+    spec:
+      template:
+        spec:
+          containers:
+          - name: flagger
+            args:
+              - -log-level=debug
+              - -mesh-provider=nginx
+              - -metrics-server=http://flagger-prometheus:9090
+              - -slack-user=flagger
+              - -slack-channel=test-flagger-alerts
+              - -slack-url=""
+            resources:
+              requests:
+                cpu: 100m
+                memory: 90Mi
+- target:
+    kind: Deployment
+    name: flagger-prometheus
+  patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: flagger-prometheus
+    spec:
+      template:
+        spec:
+          containers:
+          - name: prometheus
+            args:
+            - --storage.tsdb.retention.time=30m
+            - --config.file=/etc/prometheus/prometheus.yml
+            resources:
+              limits:
+                cpu: 400m
+                memory: 1024Mi
+              requests:
+                cpu: 100m
+                memory: 1024Mi

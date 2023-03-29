@@ -1,0 +1,47 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: falco
+  namespace: ops
+  annotations:
+    fluxcd.io/automated: "true"
+    #filter.fluxcd.io/chart-image: semver:~0.29
+spec:
+  chart:
+    repository: https://falcosecurity.github.io/charts
+    name: falco
+    version: 3.1.2
+  helmVersion: v3
+  values:
+    image:
+      registry: docker.io
+      repository: falcosecurity/falco-no-driver
+      tag: ""
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi
+    tolerations:
+    - operator: "Exists"
+    falco:
+      livenessProbe:
+        initialDelaySeconds: 480
+      readinessProbe:
+        initialDelaySeconds: 240
+    ebpf:
+      enabled: true
+    customRules:
+      white-lists.yaml: |-
+        # white list flux doing kubectl apply against api-server
+        - macro: k8s_containers
+          append: true
+          condition: or (container.image.repository contains fluxcd/flux)
+
+        # white list k8s client tool executed inside fluxcd container
+        - macro: user_known_k8s_client_container
+          append: true
+          condition: or (container.image.repository contains fluxcd/flux)

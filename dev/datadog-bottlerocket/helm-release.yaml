@@ -1,0 +1,99 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: datadog-bottlerocket
+  namespace: ops
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.agents: semver:~7.31
+    fluxcd.io/tag.clusterAgent: semver:~1.15
+spec:
+  chart:
+    repository: https://helm.datadoghq.com/
+    name: datadog
+    version: 2.23.0
+  helmVersion: v3
+  rollback:
+    enable: true
+  values:
+    datadog:
+      apiKeyExistingSecret: "datadog-keys"
+      appKeyExistingSecret: "datadog-keys"
+      nodeLabelsAsTags:
+        beta.kubernetes.io/instance-type: "k8s-instance-type"
+        kubernetes.io/role: "kube_node_role"
+      podLabelsAsTags:
+        app: "k8s_app_label"
+        release: "k8s_release_label"
+        pod-template-hash: "k8s_pod-template-hash_label"
+      logs:
+        enabled: true
+        containerCollectAll: true
+      leaderElection: true
+      collectEvents: true
+      criSocketPath: "/run/dockershim.sock"
+      kubeStateMetricsEnabled: true
+    agents:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: os-type
+                operator: In
+                values:
+                - bottlerocket
+      image:
+        repository: gcr.io/datadoghq/agent
+        tag: 7.43.1
+      containers:
+        agent:
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+      podSecurity:
+        apparmor:
+          enabled: false
+      podLabels:
+        app.hobsons.io/env-name: "dev"
+        app.hobsons.io/env-type: "dev"
+        app.hobsons.io/maintenance-contact: "dl-platform-k8s"
+        app.hobsons.io/owner-contact: "dl-platform-k8s"
+        app.hobsons.io/product-component: "k8s"
+        app.hobsons.io/product-line: "platform"
+        app.hobsons.io/provisioner: "fluxcd"
+        app.kubernetes.io/component: "k8s"
+        app.kubernetes.io/instance: "datadog"
+        app.kubernetes.io/managed-by: "fluxcd"
+        app.kubernetes.io/name: "datadog"
+        app.kubernetes.io/part-of: "platform"
+    clusterAgent:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: os-type
+                operator: In
+                values:
+                - bottlerocket
+      enabled: true
+      image:
+        repository: gcr.io/datadoghq/cluster-agent
+        tag: 1.15.1
+      resources:
+        limits:
+          cpu: 200m
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 32Mi
+      replicas: 2
+      tokenExistingSecret: "datadog-keys"
+      metricsProvider:
+        enabled: true

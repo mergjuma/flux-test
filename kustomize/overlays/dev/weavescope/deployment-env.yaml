@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weave-scope-app
+  namespace: weave
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.app: semver:~1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weave-scope-cluster-agent
+  namespace: weave
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.scope-cluster-agent: semver:~1

@@ -1,0 +1,13 @@
+apiVersion: flagger.app/v1beta1
+kind: AlertProvider
+metadata:
+  name: ops-alerts
+spec:
+  type: slack
+  channel: test-flagger-alerts
+  username: flagger
+  # webhook address (ignored if secretRef is specified)
+  # address: https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+  # secret containing the webhook address (optional)
+  secretRef:
+    name: flagger-slack-webhook-url

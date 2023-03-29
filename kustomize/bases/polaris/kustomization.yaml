@@ -1,0 +1,6 @@
+resources:
+- configmap.yaml
+- serviceaccount.yaml
+- dashboard.deployment.yaml
+- rbac.yaml
+- dashboard.service.yaml

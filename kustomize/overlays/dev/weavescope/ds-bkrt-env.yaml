@@ -1,0 +1,8 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: weave-scope-agent-bottlerocket
+  namespace: weave
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.scope-agent: semver:~1

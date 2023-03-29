@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatekeeper-controller-manager
+  namespace: gatekeeper-system
+spec:
+  template:
+    spec:
+      containers:
+        - args:
+            - --port=8443
+            - --logtostderr
+            - --exempt-namespace=kube-system
+          name: manager
