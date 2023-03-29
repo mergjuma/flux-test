@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: fluent-bit-cluster-role-binding
+    app.kubernetes.io/instance: fluent-bit-cluster-role-binding-ops
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: platform
+    app.kubernetes.io/managed-by: fluxcd
+    app.hobsons.io/env-name: dev
+    app.hobsons.io/env-type: dev
+    app.hobsons.io/product-line: platform
+    app.hobsons.io/product-component: logging
+    app.hobsons.io/provisioner: k8s
+    app.hobsons.io/owner-contact: dl-cloudops
+    app.hobsons.io/maintenance-contact: dl-cloudops
+  name: fluent-bit-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluent-bit-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: fluent-bit-service-account
+    namespace: ops

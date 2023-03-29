@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ops-apps
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    #allow access to VPN IPs only
+    alb.ingress.kubernetes.io/inbound-cidrs: "66.161.171.254/32,4.14.235.30/32,52.33.154.13/32,54.189.28.163/32,35.170.140.164/32,52.205.140.168/32,65.1.66.202/32,65.2.12.119/32"
+    ##Enable SSL
+    # ACM certificate ARN for your SSL domain
+    alb.ingress.kubernetes.io/certificate-arn: XXX
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-1-2017-01
+    ##Tag aws resources crated by this ingress
+    alb.ingress.kubernetes.io/tags: XXX
+    ##Create both http and https versions
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS": 443}]'
+    ##Redirect http->https
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/auth-type: oidc
+    alb.ingress.kubernetes.io/auth-idp-oidc: '{"Issuer":"https://login.microsoftonline.com/2fe5f249-2745-4c92-bd2a-56a69d3dff96/v2.0","AuthorizationEndpoint":"https://login.microsoftonline.com/2fe5f249-2745-4c92-bd2a-56a69d3dff96/oauth2/v2.0/authorize","TokenEndpoint":"https://login.microsoftonline.com/2fe5f249-2745-4c92-bd2a-56a69d3dff96/oauth2/v2.0/token","UserInfoEndpoint":"https://graph.microsoft.com/oidc/userinfo","SecretName":"apps-ops-k8s-oidc"}'
+    # Action to take when a request is not authenticated
+    alb.ingress.kubernetes.io/auth-on-unauthenticated-request: authenticate
+  labels:
+    app.kubernetes.io/name: ops-apps
+    app.kubernetes.io/instance: ops-apps
+spec:
+  rules:
+  - host: XXX
+    http:
+      paths:
+      - path: /*
+        backend:
+              serviceName: "ssl-redirect"
+              servicePort: use-annotation

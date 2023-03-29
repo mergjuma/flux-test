@@ -1,0 +1,23 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: aws-calico-helm
+  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/chart-image: glob:v3.19.*
+spec:
+  chart:
+    repository: https://aws.github.io/eks-charts
+    name: aws-calico
+    version: 0.3.7
+  helmVersion: v3
+  values:
+    calico:
+      tag: v3.19.1
+
+      typha:
+        image: docker.io/calico/typha
+      node:
+        image: docker.io/calico/node

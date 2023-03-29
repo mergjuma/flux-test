@@ -1,0 +1,11 @@
+version: 1
+patchUpdated:
+  generators:
+    - command: kustomize build polaris
+    - command: kustomize build weavescope
+    - command: kustomize build ops-apps-shared-ingress
+    - command: kustomize build opa-gatekeeper
+    - command: kustomize build aws-load-balancer-controller
+    - command: kustomize build calico-crds
+    - command: kustomize build kubernetes-external-secrets
+  patchFile:  flux-patch.yaml

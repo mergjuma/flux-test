@@ -1,0 +1,4 @@
+resources:
+- upstream-manifests.yaml
+- hpa.yaml
+- service-nlb.yaml

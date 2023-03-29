@@ -1,0 +1,77 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8scontainerlimits
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sContainerLimits
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            cpu:
+              type: string
+            memory:
+              type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8scontainerlimits
+        default is_not_excludedPattern = false
+
+        violation[{"msg": msg}] {
+          general_violation[{"msg": msg, "field": "containers"}]
+          is_not_excludedPattern
+        }
+
+        violation[{"msg": msg}] {
+          general_violation[{"msg": msg, "field": "initContainers"}]
+          is_not_excludedPattern
+        }
+
+        general_violation[{"msg": msg, "field": field}] {
+          container := input.review.object.spec[field][_]
+          not container.resources.requests
+          msg := sprintf("MISSING REQUESTS: container <%v> has no resource requests", [container.name])
+        }
+
+        general_violation[{"msg": msg, "field": field}] {
+          container := input.review.object.spec[field][_]
+          not container.resources.limits
+          msg := sprintf("MISSING LIMITS: container <%v> has no resource limits", [container.name])
+        }
+
+        general_violation[{"msg": msg, "field": field}] {
+          container := input.review.object.spec[field][_]
+          missing(container.resources.limits, "cpu")
+          msg := sprintf("MISSING CPU LIMITS: container <%v> has no cpu limit", [container.name])
+        }
+        general_violation[{"msg": msg, "field": field}] {
+          container := input.review.object.spec[field][_]
+          missing(container.resources.limits, "memory")
+          msg := sprintf("MISSING MEMORY LIMITS: container <%v> has no memory limit", [container.name])
+        }
+        general_violation[{"msg": msg, "field": field}] {
+          container := input.review.object.spec[field][_]
+          missing(container.resources.requests, "cpu")
+          msg := sprintf("MISSING CPU REQUESTS: container <%v> has no cpu limit", [container.name])
+        }
+        general_violation[{"msg": msg, "field": field}] {
+          container := input.review.object.spec[field][_]
+          missing(container.resources.requests, "memory")
+          msg := sprintf("MISSING MEMORY REQUESTS: container <%v> has no memory limit", [container.name])
+        }
+
+
+        missing(obj, field) = true {
+          not obj[field]
+        }
+        missing(obj, field) = true {
+          obj[field] == ""
+        }
+
+        is_not_excludedPattern {
+          re_match(input.parameters.excludePattern,input.review.object.spec.containers[_].name) == false
+        }

@@ -1,0 +1,129 @@
+---
+# Source: polaris/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: polaris
+  labels:
+    app: polaris
+    app.kubernetes.io/name: polaris
+    app.kubernetes.io/instance: polaris
+data:
+  config.yaml:  |
+    checks:
+      # reliability
+      multipleReplicasForDeployment: warning
+      priorityClassNotSet: warning
+      tagNotSpecified: danger
+      pullPolicyNotAlways: warning
+      readinessProbeMissing: warning
+      livenessProbeMissing: warning
+      # efficiency
+      cpuRequestsMissing: warning
+      cpuLimitsMissing: warning
+      memoryRequestsMissing: warning
+      memoryLimitsMissing: warning
+      # security
+      hostIPCSet: danger
+      hostPIDSet: danger
+      notReadOnlyRootFilesystem: warning
+      privilegeEscalationAllowed: danger
+      runAsRootAllowed: warning
+      runAsPrivileged: danger
+      dangerousCapabilities: danger
+      insecureCapabilities: warning
+      hostNetworkSet: warning
+      hostPortSet: warning
+    exemptions:
+      - controllerNames:
+          - kube-proxy
+          - calico-node
+          - aws-node
+          - weave-scope-agent
+        rules:
+          - runAsPrivileged
+      - controllerNames:
+          - kiam-agent
+        rules:
+          - dangerousCapabilities
+      - controllerNames:
+          - weave-scope-agent
+        rules:
+          - hostPIDSet
+      - controllerNames:
+          - kube-proxy
+          - calico-node
+          - aws-node
+          - calico-typha
+          - kiam-agent
+          - weave-scope-agent
+        rules:
+          - hostNetworkSet
+      - controllerNames:
+          - calico-typha
+        rules:
+          - hostPortSet
+      - controllerNames:
+          - calico-typha
+          - calico-typha-horizontal-autoscaler
+          - aws-node
+          - calico-node
+          - kube-proxy
+          - ops-aws-alb-ingress-controller
+          - ops-datadog-cluster-agent
+          - ops-kubernetes-external-secret-kubernetes-external-secrets
+          - tf-platform-k8s-sandbox-ops-flux
+          - tf-platform-k8s-sandbox-ops-flux-helm-operator
+          - kiam-agent
+          - kiam-server
+          - weave-scope-agent
+          - weave-scope-cluster-agent
+          - weave-scope-app
+        rules:
+          - runAsRootAllowed
+      - controllerNames:
+          - calico-typha
+          - calico-typha-horizontal-autoscaler
+          - aws-node
+          - calico-node
+          - kube-proxy
+          - ops-aws-alb-ingress-controller
+          - ops-cluster-autoscaler-aws-cluster-autoscaler
+          - ops-datadog-cluster-agent
+          - ops-kubernetes-external-secret-kubernetes-external-secrets
+          - tf-platform-k8s-sandbox-ops-flux
+          - tf-platform-k8s-sandbox-ops-flux-helm-operator
+          - tf-platform-k8s-sandbox-ops-flux-memcached
+          - kiam-agent
+          - kiam-server
+          - weave-scope-agent
+          - weave-scope-cluster-agent
+          - weave-scope-app
+        rules:
+          - notReadOnlyRootFileSystem
+      - controllerNames:
+          - ops-cluster-autoscaler-aws-cluster-autoscaler
+        rules:
+          - readinessProbeMissing
+      - controllerNames:
+          - ops-datadog-kube-state-metrics
+        rules:
+          - cpuRequestsMissing
+      - controllerNames:
+          - ops-datadog-kube-state-metrics
+        rules:
+          - cpuLimitsMissing
+      - controllerNames:
+          - ops-datadog-kube-state-metrics
+        rules:
+          - memoryRequestsMissing
+      - controllerNames:
+          - ops-datadog-kube-state-metrics
+        rules:
+          - memoryLimitsMissing
+      - controllerNames:
+          - ops-datadog-kube-state-metrics
+          - ops-kubernetes-external-secret-kubernetes-external-secrets
+          - tf-platform-k8s-sandbox-ops-flux-memcached
+        rules:
+          - livenessProbeMissing

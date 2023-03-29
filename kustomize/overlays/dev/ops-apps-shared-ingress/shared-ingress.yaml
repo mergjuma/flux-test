@@ -1,0 +1,27 @@
+- op: replace
+  path: /spec/rules/0/host
+  value: apps.ops.dev-k8s.hobsonsdev.net
+
+- op: replace
+  path: /metadata/annotations/alb.ingress.kubernetes.io~1certificate-arn
+  value: arn:aws:acm:us-east-1:452534275406:certificate/c47c30f8-2597-4815-b4c6-003201f05ed4
+
+- op: replace
+  path: /metadata/annotations/alb.ingress.kubernetes.io~1tags
+  value: "EnvName=dev,EnvType=dev,MaintenanceContact=dl-platform-k8s@hobsons.com,Name=ops-apps,OwnerContact=dl-platform-k8s@hobsons.com,ProductComponent=ops-apps,ProductLine=platform,Provisioner=fluxcd"
+
+- op: add
+  path: /spec/rules/0/http/paths/-
+  value:
+    path: '/polaris/*'
+    backend:
+      serviceName: polaris-dashboard
+      servicePort: 80
+
+- op: add
+  path: /spec/rules/0/http/paths/-
+  value:
+    path: '/*'
+    backend:
+      serviceName: weave-scope-app
+      servicePort: 80

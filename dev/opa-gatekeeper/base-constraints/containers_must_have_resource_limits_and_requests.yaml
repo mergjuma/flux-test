@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sContainerLimits
+metadata:
+  name: containers-must-have-resource-limits-and-requests
+spec:
+  enforcementAction: dryrun
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    # This pattern should include the container name and not the pod name
+    # autoscaler container comes from calico-typha-horizontal-autoscaler pod
+    "excludePattern": "^(kube-.*|coredns|calico-.*|autoscaler|aws-node|linkerd-.*)$"

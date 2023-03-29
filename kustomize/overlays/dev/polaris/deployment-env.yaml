@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polaris-dashboard
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.dashboard: semver:~3
+spec:
+  template:
+    spec:
+      volumes:
+      - name: config
+        configMap:
+          name: polaris
+      containers:
+        - command:
+            - polaris
+            - dashboard
+            - --base-path
+            - /polaris/
+            - --config
+            - /opt/app/config.yaml
+          name: dashboard
+          livenessProbe:
+            httpGet:
+              path: /polaris/health
+          readinessProbe:
+            httpGet:
+              path: /polaris/health
+          volumeMounts:
+          - name: config
+            mountPath: /opt/app/config.yaml
+            subPath: config.yaml
+            readOnly: true

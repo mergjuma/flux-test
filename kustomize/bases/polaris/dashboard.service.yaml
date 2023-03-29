@@ -1,0 +1,23 @@
+---
+# Source: polaris/templates/dashboard.service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: polaris-dashboard
+  labels:
+    app: polaris
+    app.kubernetes.io/name: polaris
+    app.kubernetes.io/instance: polaris
+  annotations:
+spec:
+  ports:
+  - name: http-dashboard
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: polaris
+    app.kubernetes.io/name: polaris
+    app.kubernetes.io/instance: polaris
+    component: dashboard
+  type: NodePort

@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: weave-scope-agent-bottlerocket
+  namespace: ops
+spec:
+  template:
+    spec:
+      $setElementOrder/containers:
+      - name: scope-agent
+      containers:
+      - image: weaveworks/scope:1.13.2
+        name: scope-agent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polaris-dashboard
+  namespace: ops
+spec:
+  template:
+    spec:
+      $setElementOrder/containers:
+      - name: dashboard
+      containers:
+      - image: quay.io/fairwinds/polaris:3.2.1
+        name: dashboard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weave-scope-app
+  namespace: ops
+spec:
+  template:
+    spec:
+      $setElementOrder/containers:
+      - name: app
+      containers:
+      - image: weaveworks/scope:1.13.2
+        name: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weave-scope-cluster-agent
+  namespace: ops
+spec:
+  template:
+    spec:
+      $setElementOrder/containers:
+      - name: scope-cluster-agent
+      containers:
+      - image: docker.io/weaveworks/scope:1.13.2
+        name: scope-cluster-agent
